@@ -1,8 +1,9 @@
 #include "mapBuild.h"
+
 std::string indent(int numindent){
 	std::string output="\n";
 	for(int i=0;i<numindent;i++){
-		output+="  ";
+		output+="     ";
 	}
 	return output;
 }
@@ -13,7 +14,7 @@ std::string genName(int faction, int seed){
 	const int humanSize=1;
 	const int orcSize=1;
 	int orcListFirst[orcSize];
-	switch(faction){
+	/*switch(faction){
 	case 'h'://human
 	break;
 	case 'e'://elf
@@ -26,10 +27,11 @@ std::string genName(int faction, int seed){
 	break;
 	default:
 	return "Unknown";
-	}
+	}*/
 	return "Unknown";
 }
-std::string** makeArr(const int numEmpires, int x, int y, int seed){
+Empire* makeEmps(const int numEmpires, int x, int y, int seed){
+	char FACTION_LIST[NUM_FACTIONS] = {'h','e','d','o','D'};
 	srand(time(NULL));//the seed is a number which is used to generate things. To prevent division by 0 errors, a 0 seed is explicitly rejected
 	if(seed==0||seed>=999999){
 		std::cout<<"Invalid Seed, please try again"<<std::endl;
@@ -38,35 +40,95 @@ std::string** makeArr(const int numEmpires, int x, int y, int seed){
 	if(seed==NULL){//if a seed is not provided, a random one is generated
 	seed=rand()%999999;
 	}
+	debug(numEmpires)
 	Empire* empArr=new Empire[numEmpires];
-	for(int i=0;i<numEmpires;i++){
+	int eArea= x*y;
+	int eSize;
+	int eSeed;
+	int eMx;
+	int eMy;
+	for(int i=1;i<=numEmpires;i++){
+		debugMark(Debugging Empire Generation Loop)
+		eSeed=(seed+(7*i))%seed;
+		eMx=((numEmpires/eArea)*i)+((eSeed/i)%numEmpires);
+		eMy=((numEmpires/eArea)*i)+(((eSeed/i)*(7/3))%numEmpires);
+		eSize=eArea%(numEmpires+i)+1;
+		debug(eSize)
+		empArr[i-1].buildEmpire(eSize,eSeed,eMx,eMy,FACTION_LIST[(i-1)%NUM_FACTIONS]);
 	}
-	return NULL;
+	return empArr;
 }
-void Empire::buildEmpire(int esize, int seed, int mx, int my, char faction){
+void Empire::buildEmpire(int esize, int seed, int mx, int my, char nfaction){
+	faction=nfaction;
+	debugMark(Debugging Empire)
 	name=genName(faction, seed);
-	numTowns=seed%(esize/3);
-	int TownAvSize=numTowns/15;
+	numTowns=seed%esize+1;
+	debug(seed)
+	debug(esize)
+	debug(numTowns)
+	int TownAvSize=numTowns/esize;
+	TownAvSize+= TownAvSize ? 0 : 1;
+	radius=esize;
+	ID=seed;
+	x=mx;
+	y=my;
+	debug(mx)
+	debug(my)
 	TownArr=new Town[numTowns];
+	debug(TownArr)
 	int tseed;
 	int tx;
 	int ty;
 	for(int i=1;i<=numTowns;i++){
-		tseed=seed+(31*i*(seed/RAND_MAX));
-		tx=(tseed%esize)-(mx/2);// generates the x location of the town
-		int sizeratio=esize/10;
+		debugMark(Debugging Town Loop)
+		debug(i)
+		tseed=seed+(7*i);
+		debug(tseed)
+		tx=mx+ ((tseed%i)-mx);// generates the x location of the town
+		debug(tx)
+		int sizeratio=esize/numTowns;
+		debug(sizeratio)
 		tx+= tx==0 ? sizeratio: (tx>-sizeratio&&tx<sizeratio ? tx*sizeratio:0);//if tx is 0, adds ten, if tx is less then sizeratio away from center, multiplies by sizeratio
-		ty=((tseed*7/3)%esize)-(my/2);
+		debugMark(After Tx Ternary)
+		ty=my+((tseed*7/3)%i-my);
 		ty+= ty==0 ? sizeratio: (ty>-sizeratio&&ty<sizeratio ? ty*sizeratio:0);
+		tx = tx<0 ? 0:tx;
+		ty = ty<0 ? 0:ty;
+		debugMark(After Ty Ternary)
+		debug(tseed)
+		debug(TownAvSize)
 		TownArr[i-1].buildTown(tseed%TownAvSize, tseed, tx, ty, faction);
+		debugMark(Town Build)
 	}
 	
 }
 void Town::buildTown(int size, int seed, int nx, int ny, char nfaction){
+		size += size ? 0 : 1;
+		debugMark(Debugging Town)
+		ID=seed;
+		debug(seed)
+		debug(size)
 		tsize=seed%size;
 		x=nx;
 		y=ny;
 		faction=nfaction;
 		name=genName(faction, seed);
 		
+}
+void Empire::printEmpire(){
+	std::cout<<"\n"<<"id:"<<ID
+	<<indent(1)<<"x:"<<x
+	<<indent(1)<<"y:"<<y
+	<<indent(1)<<"faction:"<<faction
+	<<indent(1)<<"number of towns:"<<numTowns
+	<<indent(1)<<"size:"<<radius;
+		for(int i=0;i<numTowns;i++){
+			TownArr[i].printTown();
+		}
+}
+void Town::printTown(){
+	std::cout<<"\n"<<indent(2)<<"id:"<<ID
+	<<indent(3)<<"x:"<<x
+	<<indent(3)<<"y:"<<y
+	<<indent(3)<<"size:"<<tsize;
 }
