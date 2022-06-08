@@ -7,7 +7,7 @@ std::string indent(int numindent){
 	}
 	return output;
 }
-std::string genName(int faction, int seed){
+std::string genName(int faction, int seed){//depending on the faction+seed, gives a combination of a first+last half of faction
 	const int elfSize=1;
 	const int dwarfSize=1;
 	const int dragonBSize=1;
@@ -40,7 +40,7 @@ Empire* makeEmps(const int numEmpires, int x, int y, int seed){
 	if(seed==NULL){//if a seed is not provided, a random one is generated
 	seed=rand()%999999;
 	}
-	debug(numEmpires)
+	//debug(numEmpires)
 	Empire* empArr=new Empire[numEmpires];
 	int eArea= x*y;
 	int eSize;
@@ -50,9 +50,14 @@ Empire* makeEmps(const int numEmpires, int x, int y, int seed){
 	for(int i=1;i<=numEmpires;i++){
 		debugMark(Debugging Empire Generation Loop)
 		eSeed=(seed+(7*i))%seed;
-		eMx=((numEmpires/eArea)*i)+((eSeed/i)%numEmpires);
-		eMy=((numEmpires/eArea)*i)+(((eSeed/i)*(7/3))%numEmpires);
+		debug(eArea)
+		debug(i)
+		debug(numEmpires)
 		eSize=eArea%(numEmpires+i)+1;
+		debug(eSeed)
+		debug(seed)
+		eMx=x-(x/eSeed);
+		eMy=y-(y/(eSeed+eMx));
 		debug(eSize)
 		empArr[i-1].buildEmpire(eSize,eSeed,eMx,eMy,FACTION_LIST[(i-1)%NUM_FACTIONS]);
 	}
@@ -63,17 +68,17 @@ void Empire::buildEmpire(int esize, int seed, int mx, int my, char nfaction){
 	debugMark(Debugging Empire)
 	name=genName(faction, seed);
 	numTowns=seed%esize+1;
-	debug(seed)
-	debug(esize)
-	debug(numTowns)
+	//debug(seed)
+	//debug(esize)
+	//debug(numTowns)
 	int TownAvSize=numTowns/esize;
 	TownAvSize+= TownAvSize ? 0 : 1;
 	radius=esize;
 	ID=seed;
 	x=mx;
 	y=my;
-	debug(mx)
-	debug(my)
+	//debug(mx)
+	//debug(my)
 	TownArr=new Town[numTowns];
 	debug(TownArr)
 	int tseed;
@@ -81,24 +86,24 @@ void Empire::buildEmpire(int esize, int seed, int mx, int my, char nfaction){
 	int ty;
 	for(int i=1;i<=numTowns;i++){
 		debugMark(Debugging Town Loop)
-		debug(i)
+		//debug(i)
 		tseed=seed+(7*i);
 		debug(tseed)
 		tx=mx+ ((tseed%i)-mx);// generates the x location of the town
-		debug(tx)
+		//debug(tx)
 		int sizeratio=esize/numTowns;
-		debug(sizeratio)
+		//debug(sizeratio)
 		tx+= tx==0 ? sizeratio: (tx>-sizeratio&&tx<sizeratio ? tx*sizeratio:0);//if tx is 0, adds ten, if tx is less then sizeratio away from center, multiplies by sizeratio
 		debugMark(After Tx Ternary)
 		ty=my+((tseed*7/3)%i-my);
 		ty+= ty==0 ? sizeratio: (ty>-sizeratio&&ty<sizeratio ? ty*sizeratio:0);
 		tx = tx<0 ? 0:tx;
 		ty = ty<0 ? 0:ty;
-		debugMark(After Ty Ternary)
-		debug(tseed)
-		debug(TownAvSize)
+		//debugMark(After Ty Ternary)
+		//debug(tseed)
+		//debug(TownAvSize)
 		TownArr[i-1].buildTown(tseed%TownAvSize, tseed, tx, ty, faction);
-		debugMark(Town Build)
+		//debugMark(Town Build)
 	}
 	
 }
