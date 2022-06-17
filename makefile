@@ -1,12 +1,12 @@
 CC = g++
 CFLAGS = -g -Wall
 
-MapMain:MapMain.o MapFuncs.o mapBuild.o
-	$(CC) $(CFLAGS) MapMain.o MapFuncs.o mapBuild.o -o MapMain 
+MapMain:mapBuild.o MapFuncs.o MapMain.o 
+	$(CC) $(CFLAGS) mapBuild.o MapFuncs.o MapMain.o -o MapMain
 	./MapMain
-MapMain.o:MapMain.cpp MapFuncs.h
-	$(CC) $(CFLAGS) MapMain.cpp -c  
-MapFuncs.o: MapFuncs.cpp MapFuncs.h mapBuild.h
-	$(CC) $(CFLAGS) MapFuncs.cpp -c 
-mapBuild.o: mapBuild.h mapBuild.cpp 
+mapBuild.o:mapBuild.cpp mapBuild.h
 	$(CC) $(CFLAGS) mapBuild.cpp -c
+MapFuncs.o:MapFuncs.cpp MapFuncs.h
+	$(CC) $(CFLAGS) MapFuncs.cpp -c
+MapMain.o:MapMain.cpp MapFuncs.h
+	$(CC) $(CFLAGS) MapMain.cpp -c
