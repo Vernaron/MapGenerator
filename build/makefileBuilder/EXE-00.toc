@@ -104,7 +104,7 @@
  [],
  False,
  False,
- 1655437983,
+ 1655515779,
  [('run.exe',
    'C:\\Users\\Lyzander '
    'Johnson\\AppData\\Local\\Programs\\Python\\Python310\\lib\\site-packages\\PyInstaller\\bootloader\\Windows-64bit\\run.exe',

@@ -1,5 +1,18 @@
 #include "mapBuild.h"
-
+int roundUp(float x){
+	int a = (int)x>=x ? (int)x : (int)x+1;
+}
+int increment(int limit, int incrementNum){
+	debugMark(Increment Function)
+	int returnValue=0;
+	for (int i=0;i<incrementNum;i++){
+	returnValue+=1;
+	debug(returnValue)
+	debug(limit)
+	returnValue= returnValue>limit ? 0 : returnValue;
+	}
+	return returnValue;
+}
 std::string indent(int numindent){
 	std::string output="\n";
 	for(int i=0;i<numindent;i++){
@@ -8,13 +21,13 @@ std::string indent(int numindent){
 	return output;
 }
 std::string genName(int faction, int seed){//depending on the faction+seed, gives a combination of a first+last half of faction
-	const int elfSize=1;
+	/*const int elfSize=1;
 	const int dwarfSize=1;
 	const int dragonBSize=1;
 	const int humanSize=1;
 	const int orcSize=1;
 	int orcListFirst[orcSize];
-	/*switch(faction){
+	switch(faction){
 	case 'h'://human
 	break;
 	case 'e'://elf
@@ -43,6 +56,8 @@ Empire* makeEmps(const int numEmpires, int x, int y, int seed){
 	//debug(numEmpires)
 	Empire* empArr=new Empire[numEmpires];
 	int eArea= x*y;
+	int xLim= x*.2;
+	int yLim=y*.2;
 	int eSize;
 	int eSeed;
 	int eMx;
@@ -56,8 +71,8 @@ Empire* makeEmps(const int numEmpires, int x, int y, int seed){
 		eSize=eArea%(numEmpires+i)+1;
 		debug(eSeed)
 		debug(seed)
-		eMx=x-(x/eSeed);
-		eMy=y-(y/(eSeed+eMx));
+		eMx=xLim+increment(numEmpires/5+1,i) * ((x-xLim)/(numEmpires/5)); 
+		eMy=yLim;
 		debug(eSize)
 		empArr[i-1].buildEmpire(eSize,eSeed,eMx,eMy,FACTION_LIST[(i-1)%NUM_FACTIONS]);
 	}
@@ -123,13 +138,13 @@ void Town::buildTown(int size, int seed, int nx, int ny, char nfaction){
 void Empire::printEmpire(){
 	std::cout<<"\n"<<"id:"<<ID
 	<<indent(1)<<"x:"<<x
-	<<indent(1)<<"y:"<<y
-	<<indent(1)<<"faction:"<<faction
+	<<indent(1)<<"y:"<<y;
+	/*<<indent(1)<<"faction:"<<faction
 	<<indent(1)<<"number of towns:"<<numTowns
 	<<indent(1)<<"size:"<<radius;
-		for(int i=0;i<numTowns;i++){
+	/*	for(int i=0;i<numTowns;i++){
 			TownArr[i].printTown();
-		}
+		}*/
 }
 void Town::printTown(){
 	std::cout<<"\n"<<indent(2)<<"id:"<<ID

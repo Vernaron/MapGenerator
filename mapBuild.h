@@ -1,9 +1,12 @@
 #ifndef MAPBUILD_H
 #define MAPBUILD_H
+//library inclusions
 #include <iostream>
 #include <string>
 #include <random>
 #include <time.h>
+#include <math.h>
+//begin debug macro definitions
 //#define PRINTDEBUG 
 #define debug(x) 
 #define debugMark(x)
@@ -11,6 +14,7 @@
 #define debug(x) std::cout<<#x<<":"<<x<<std::endl; 
 #define debugMark(x) std::cout<<"--"<<#x<<"--"<<std::endl; 
 #endif
+//end debug macro definitions
 #define NUM_FACTIONS 5 //defines number of factions for entire program
 class Town{
 	int ID;
@@ -39,4 +43,6 @@ class Empire{
 Empire* makeEmps(int numEmpires, int x, int y, int seed);
 std::string indent(int numindent);
 std::string genName(int faction, int seed);
+int roundUp(float x);
+int increment(int limit, int incrementNum);
 #endif

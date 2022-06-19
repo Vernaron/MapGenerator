@@ -1,5 +1,5 @@
 import os
-mfb=open("../makefileBuilderInfo", 'r')
+mfb=open("makefileBuilderInfo", 'r')
 CC=mfb.readline()
 CFLAGS=mfb.readline()
 finalname=mfb.readline()
@@ -16,7 +16,7 @@ class Module:
     #stops if a { is found
     def findHeaders(self, mainFile):
         self.headers = []
-        headCheck = open("../"+mainFile, 'r')
+        headCheck = open(mainFile, 'r')
         currFile =  headCheck.readlines()
         for line in currFile:
             if '{' in line:
@@ -37,7 +37,7 @@ class Module:
             makefile.write(" "+header)
         makefile.write("\n\t$(CC) $(CFLAGS) "+self.mainFile+" -c\n")
 print(" ")
-for path, subdirs, files in os.walk("../"):
+for path, subdirs, files in os.walk("."):
     for name in files:
         if "dist" not in files:
             if name.endswith(".c") or name.endswith(".cpp"):
@@ -47,7 +47,7 @@ for each in allModules:
     print(each.mainFile)
     print (each.headers)
 #last compilation lines
-makefile=open("../makefile", "w")
+makefile=open("makefile", "w")
 makefile.write(CC+CFLAGS)
 makefile.write("\n"+finalname+":")
 for module in allModules:
