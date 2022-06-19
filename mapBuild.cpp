@@ -72,15 +72,15 @@ Empire* makeEmps(const int numEmpires, int x, int y, int seed){
 	int eMy;
 	for(int i=1;i<=numEmpires;i++){
 		debugMark(Debugging Empire Generation Loop)
-		eSeed=(seed+(7*i))%seed;
+		  eSeed=((seed+(7*i))%seed)%99999;
 		debug(eArea)
 		debug(i)
 		debug(numEmpires)
 		eSize=eArea%(numEmpires+i)+1;
 		debug(eSeed)
 		debug(seed)
-		  eMx=xLim+(((x-(2*xLim))/numEmpires)*i)+((i*eSeed)%((x-(2*xLim))/numEmpires));
-		  eMy=(zoomIn(yLim, y-yLim, y/10, eSeed));
+		  eMx=xLim+(((x-(2*xLim))/(numEmpires/2))*(i%(numEmpires/2)))+((i*eSeed)%((x-(2*xLim))/(numEmpires/2)));
+		eMy=yLim+(i*eSeed)%(y-(2*yLim));
 		debug(eSize)
 		empArr[i-1].buildEmpire(eSize,eSeed,eMx,eMy,FACTION_LIST[(i-1)%NUM_FACTIONS]);
 	}
