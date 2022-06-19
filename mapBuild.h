@@ -45,4 +45,5 @@ std::string indent(int numindent);
 std::string genName(int faction, int seed);
 int roundUp(float x);
 int increment(int limit, int incrementNum);
+int zoomIn(int min, int max, int numIters, int seed);
 #endif

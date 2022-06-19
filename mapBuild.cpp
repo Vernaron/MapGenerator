@@ -1,6 +1,14 @@
 #include "mapBuild.h"
+int zoomIn(int min, int max, int numIters, int seed){
+  if (!numIters){
+    return min;
+  }
+    seed=(int)(((float)seed/(seed*seed))*2.3);
+    return (seed%2? zoomIn(min, max/2, numIters-1, seed):zoomIn(max/2, max, numIters-1, seed));
+}
 int roundUp(float x){
 	int a = (int)x>=x ? (int)x : (int)x+1;
+	return a;
 }
 int increment(int limit, int incrementNum){
 	debugMark(Increment Function)
@@ -56,8 +64,8 @@ Empire* makeEmps(const int numEmpires, int x, int y, int seed){
 	//debug(numEmpires)
 	Empire* empArr=new Empire[numEmpires];
 	int eArea= x*y;
-	int xLim= x*.2;
-	int yLim=y*.2;
+	int xLim= x*.1;
+	int yLim=y*.1;
 	int eSize;
 	int eSeed;
 	int eMx;
@@ -71,8 +79,8 @@ Empire* makeEmps(const int numEmpires, int x, int y, int seed){
 		eSize=eArea%(numEmpires+i)+1;
 		debug(eSeed)
 		debug(seed)
-		eMx=xLim+increment(numEmpires/5+1,i) * ((x-xLim)/(numEmpires/5)); 
-		eMy=yLim;
+		  eMx=xLim+(((x-(2*xLim))/numEmpires)*i)+((i*eSeed)%((x-(2*xLim))/numEmpires));
+		  eMy=(zoomIn(yLim, y-yLim, y/10, eSeed));
 		debug(eSize)
 		empArr[i-1].buildEmpire(eSize,eSeed,eMx,eMy,FACTION_LIST[(i-1)%NUM_FACTIONS]);
 	}
