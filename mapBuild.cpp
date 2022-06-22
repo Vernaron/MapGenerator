@@ -1,4 +1,7 @@
 #include "mapBuild.h"
+int sq(int num){
+return num*num;
+}
 int zoomIn(int min, int max, int numIters, int seed){
   if (!numIters){
     return min;
@@ -6,7 +9,7 @@ int zoomIn(int min, int max, int numIters, int seed){
     seed=(int)(((float)seed/(seed*seed))*2.3);
     return (seed%2? zoomIn(min, max/2, numIters-1, seed):zoomIn(max/2, max, numIters-1, seed));
 }
-int roundUp(float x){
+int roundUp(auto x){
 	int a = (int)x>=x ? (int)x : (int)x+1;
 	return a;
 }
@@ -64,73 +67,65 @@ Empire* makeEmps(const int numEmpires, int x, int y, int seed){
 	//debug(numEmpires)
 	Empire* empArr=new Empire[numEmpires];
 	int eArea= x*y;
-	int xLim= x*.1;
-	int yLim=y*.1;
+	int xLim= x*.05;
+	int yLim=y*.05;
 	int eSize;
 	int eSeed;
 	int eMx;
 	int eMy;
 	for(int i=1;i<=numEmpires;i++){
 		debugMark(Debugging Empire Generation Loop)
-		  eSeed=((seed+(7*i))%seed)%99999;
+		  eSeed=(seed+(14*i))%99999;
 		debug(eArea)
 		debug(i)
 		debug(numEmpires)
-		eSize=eArea%(numEmpires+i)+1;
+		eSize=eArea/(50*numEmpires);
 		debug(eSeed)
 		debug(seed)
-		  eMx=xLim+(((x-(2*xLim))/(numEmpires/2))*(i%(numEmpires/2)))+((i*eSeed)%((x-(2*xLim))/(numEmpires/2)));
-		eMy=yLim+(i*eSeed)%(y-(2*yLim));
+		  eMx=xLim+(((x-(2*xLim))/(numEmpires/2))*(i%(numEmpires/2)))+((i*sq(eSeed))%((x-(2*xLim))/(numEmpires/2)));
+		eMy=yLim+(i*sq(eSeed))%(y-(2*yLim));
 		debug(eSize)
-		empArr[i-1].buildEmpire(eSize,eSeed,eMx,eMy,FACTION_LIST[(i-1)%NUM_FACTIONS]);
+		empArr[i-1].buildEmpire(eSize,eSeed,eMx,eMy,FACTION_LIST[(i-1)%NUM_FACTIONS],x,y);
 	}
 	return empArr;
 }
-void Empire::buildEmpire(int esize, int seed, int mx, int my, char nfaction){
+void Empire::buildEmpire(int esize, int seed, int mx, int my, char nfaction, int xMax, int yMax){
 	faction=nfaction;
 	debugMark(Debugging Empire)
 	name=genName(faction, seed);
-	numTowns=seed%esize+1;
-	//debug(seed)
-	//debug(esize)
-	//debug(numTowns)
+	numTowns=esize/5;
 	int TownAvSize=numTowns/esize;
 	TownAvSize+= TownAvSize ? 0 : 1;
 	radius=esize;
 	ID=seed;
 	x=mx;
 	y=my;
-	//debug(mx)
-	//debug(my)
 	TownArr=new Town[numTowns];
-	debug(TownArr)
 	int tseed;
 	int tx;
 	int ty;
+	double angle;
+	int sizeratio;
+	const auto PI = std::acos(-1);
 	for(int i=1;i<=numTowns;i++){
 		debugMark(Debugging Town Loop)
-		//debug(i)
-		tseed=seed+(7*i);
-		debug(tseed)
-		tx=mx+ ((tseed%i)-mx);// generates the x location of the town
-		//debug(tx)
-		int sizeratio=esize/numTowns;
-		//debug(sizeratio)
-		tx+= tx==0 ? sizeratio: (tx>-sizeratio&&tx<sizeratio ? tx*sizeratio:0);//if tx is 0, adds ten, if tx is less then sizeratio away from center, multiplies by sizeratio
-		debugMark(After Tx Ternary)
-		ty=my+((tseed*7/3)%i-my);
-		ty+= ty==0 ? sizeratio: (ty>-sizeratio&&ty<sizeratio ? ty*sizeratio:0);
-		tx = tx<0 ? 0:tx;
-		ty = ty<0 ? 0:ty;
-		//debugMark(After Ty Ternary)
-		//debug(tseed)
-		//debug(TownAvSize)
-		TownArr[i-1].buildTown(tseed%TownAvSize, tseed, tx, ty, faction);
-		//debugMark(Town Build)
+		tseed=((seed+(7*i))%seed)%99999;
+		angle=(sq(i)*sq(tseed));
+		tx=x+(radius*std::cos(angle*(PI/180)))-1;// generates the x location of the town
+		sizeratio=esize/numTowns;
+		ty=y+(radius*std::sin(angle*(PI/180)))-1;
+		debug(tx)
+		debug(ty)
+		tx= tx==x ? x+1:tx;
+		ty= ty==y ? y+1:ty;
+		tx= tx<1? 1 : tx>xMax-2 ? xMax-2 : tx;
+		ty= ty<1? 1 : ty>yMax-2 ? yMax-2 : ty;
+		
+		TownArr[i-1].buildTown(tseed%TownAvSize, tseed, tx, ty, faction, xMax, yMax);
 	}
 	
 }
-void Town::buildTown(int size, int seed, int nx, int ny, char nfaction){
+void Town::buildTown(int size, int seed, int nx, int ny, char nfaction, int xMax, int yMax){
 		size += size ? 0 : 1;
 		debugMark(Debugging Town)
 		ID=seed;
@@ -146,17 +141,75 @@ void Town::buildTown(int size, int seed, int nx, int ny, char nfaction){
 void Empire::printEmpire(){
 	std::cout<<"\n"<<"id:"<<ID
 	<<indent(1)<<"x:"<<x
-	<<indent(1)<<"y:"<<y;
-	/*<<indent(1)<<"faction:"<<faction
+	<<indent(1)<<"y:"<<y
+	<<indent(1)<<"faction:"<<faction
 	<<indent(1)<<"number of towns:"<<numTowns
 	<<indent(1)<<"size:"<<radius;
-	/*	for(int i=0;i<numTowns;i++){
+		for(int i=0;i<numTowns;i++){
 			TownArr[i].printTown();
-		}*/
+		}
 }
 void Town::printTown(){
 	std::cout<<"\n"<<indent(2)<<"id:"<<ID
 	<<indent(3)<<"x:"<<x
 	<<indent(3)<<"y:"<<y
 	<<indent(3)<<"size:"<<tsize;
+}
+void Town::setTown(char** printedMap){
+	printedMap[y][x]='T';
+}
+void Empire::setEmpire(char** printedMap, int xMax, int yMax){
+	float xR;
+	float yR;
+	const auto pi=std::acos(-1);
+	int radTemp=1;	
+	bool hitBorder;
+	for(int i=1;i<360;i+=5){
+		radTemp=1;
+		hitBorder=false;
+		int j=1;
+		while (j<=radius){
+			xR=(float)x+((float)j*std::cos((float)i*(pi/180)));
+			yR=(float)y+((float)j*std::sin((float)i*(pi/180)));
+			if (!hitBorder){
+				radTemp = j;
+			}
+			if (xR<1||yR<1||xR>xMax-2||yR>yMax-2){
+				break;
+			}
+			if(printedMap[(int)yR][(int)xR]=='`'){
+				hitBorder=true;
+			}
+			printedMap[(int)yR][(int)xR]=' ';
+			j+=1;
+		}
+		if(!hitBorder){
+			xR=(float)x+((float)radius*std::cos((float)i*(pi/180)));
+			yR=(float)y+((float)radius*std::sin((float)i*(pi/180)));
+			if (!(xR<1)&&!(yR<1)&&!(xR>xMax-2)&&!(yR>yMax-2)){
+				printedMap[(int)yR][(int)xR]='`';
+			}
+		}
+		else{
+			xR=(float)x+((float)((radius+radTemp)/2)*std::cos((float)i*(pi/180)));
+			yR=(float)y+((float)((radius+radTemp)/2)*std::sin((float)i*(pi/180)));
+			std::cout<<indent(1)<<"Made It";
+			if (!(xR<1)&&!(yR<1)&&!(xR>xMax-2)&&!(yR>yMax-2)){
+				continue;
+			}
+			printedMap[(int)yR][(int)xR]='`';
+		}
+	}
+	
+
+	printedMap[y][x]='E';
+	for(int i=0;i<numTowns;i++){
+		TownArr[i].setTown(printedMap);
+	}
+}
+void Empire::setToken(char** printedMap, int xMax, int yMax){
+	printedMap[y][x]='E';
+	for(int i=0;i<numTowns;i++){
+		TownArr[i].setTown(printedMap);
+	}
 }

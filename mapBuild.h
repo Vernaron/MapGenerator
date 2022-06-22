@@ -6,8 +6,9 @@
 #include <random>
 #include <time.h>
 #include <math.h>
+#include <cmath>
 //begin debug macro definitions
-//#define PRINTDEBUG 
+#define PRINTDEBUG 
 #define debug(x) 
 #define debugMark(x)
 #ifndef PRINTDEBUG 
@@ -24,8 +25,9 @@ class Town{
 	char faction;
 	std::string name;
 	public: 
-	void buildTown(int size, int seed, int nx, int ny, char nfaction);
+	void buildTown(int size, int seed, int nx, int ny, char nfaction, int xMax, int yMax);
 	void printTown();
+	void setTown(char** printedMap);
 };
 class Empire{
 	int x;
@@ -37,13 +39,16 @@ class Empire{
 	int radius;
 	std::string name;
 	public:
-	void buildEmpire(int esize, int seed, int mx, int my, char nfaction);
+	void buildEmpire(int esize, int seed, int mx, int my, char nfaction, int xMax, int yMax);
+	void setEmpire(char** printedMap, int xMax, int yMax);
 	void printEmpire();
+	void setToken(char** printedMap, int xMax, int yMax);
 };
 Empire* makeEmps(int numEmpires, int x, int y, int seed);
 std::string indent(int numindent);
 std::string genName(int faction, int seed);
-int roundUp(float x);
+int roundUp(auto x);
 int increment(int limit, int incrementNum);
 int zoomIn(int min, int max, int numIters, int seed);
+int sq(int num);
 #endif
